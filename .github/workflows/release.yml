@@ -1,0 +1,42 @@
+name: Release
+
+on:
+    push:
+        tags:
+            - "*"
+
+jobs:
+    release:
+        name: Release Extension
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Setup PNPM
+              uses: pnpm/action-setup@v2.2.2
+              with:
+                  version: latest
+                  run_install: true
+
+            - name: Build Extension
+              run: pnpm build
+
+            - name: Publish Release
+              uses: "marvinpinto/action-automatic-releases@latest"
+              with:
+                  repo_token: "${{ secrets.GITHUB_TOKEN }}"
+                  prerelease: false
+                  files: |
+                      dist/**/*
+                      README.md
+                      LICENSE
+
+            - name: Deploy
+              uses: peaceiris/actions-gh-pages@v3
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN  }}
+                  publish_dir: "./dist"
+                  publish_branch: "dist"
